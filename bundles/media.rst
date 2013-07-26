@@ -16,7 +16,8 @@ This bundle provides:
 
 * base documents for a simple model;
 * base FormTypes for the simple model;
-* a download controller for file downloads;
+* a file controller for file downloads and uploads;
+* an image controller to display an image;
 * and handlers for common processes related to the storage layer.
 
 It can also provide adapters for integrating:
@@ -39,12 +40,12 @@ Dependencies
 
 For PHPCR:
 
-* :doc:`PHPCR-ODM <phpcr_odm>` is used to persist the bundles documents.
+* :doc:`PHPCR-ODM <phpcr_odm>` is used to persist the bundles documents;
+* `phpcr/phpcr-utils`_.
 
 When using the Gaufrette adapter:
 
-* `KnpLabs/Gaufrette`_;
-* `phpcr/phpcr-utils`_ (PHPCR).
+* `KnpLabs/Gaufrette`_.
 
 For web editing tools:
 
@@ -66,6 +67,7 @@ Configuration
             file_class:       ~
             directory_class:  ~
             image_class:      ~
+            use_jms_serializer: 'auto'
             use_liip_imagine: 'auto'
             imagine_filter:   image_upload_thumbnail
             extra_filters:
@@ -83,6 +85,7 @@ Configuration
             file-class=""
             directory-class=""
             image-class=""
+            use-jms-serializer="auto"
             use-liip-imagine="auto"
             imagine-filter="image_upload_thumbnail"
         >
@@ -94,16 +97,17 @@ Configuration
 
         // app/config/config.php
         $container->loadFromExtension('cmf_media', array(
-            'manager_registry' => 'doctrine_phpcr', // or doctrine_orm
-            'manager_name'     => 'default',
-            'media_basepath'   => '/cms/media',
-            'media_class'      => null,
-            'file_class'       => null,
-            'directory_class'  => null,
-            'image_class'      => null,
-            'use_liip_imagine' => 'auto',
-            'imagine_filter'   => 'image_upload_thumbnail',
-            'extra_filters'    => array(
+            'manager_registry'   => 'doctrine_phpcr', // or doctrine_orm
+            'manager_name'       => 'default',
+            'media_basepath'     => '/cms/media',
+            'media_class'        => null,
+            'file_class'         => null,
+            'directory_class'    => null,
+            'image_class'        => null,
+            'use_jms_serializer' => 'auto',
+            'use_liip_imagine'   => 'auto',
+            'imagine_filter'     => 'image_upload_thumbnail',
+            'extra_filters'      => array(
                 'imagine_filter_name1',
                 'imagine_filter_name2',
             ),
@@ -112,40 +116,51 @@ Configuration
 Installation
 ------------
 
-When using the download controller add the following lines to the end of your
-routing file:
+1. When using the file and image controller for downloading, uploading and
+   displaying, add the following lines to the end of your routing file:
 
-.. configuration-block::
+   .. configuration-block::
 
-    .. code-block:: yaml
+       .. code-block:: yaml
 
-        # app/config/routing.yml
+           # app/config/routing.yml
 
-        # ...
-        media:
-            resource: "@CmfMediaBundle/Resources/config/routing/download.xml"
+           # ...
+           cmf_media_file:
+               resource: "@CmfMediaBundle/Resources/config/routing/file.xml"
 
-    .. code-block:: xml
+           cmf_media_image:
+               resource: "@CmfMediaBundle/Resources/config/routing/image.xml"
 
-        <!-- app/config/routing.xml -->
-        <?xml version="1.0" encoding="UTF-8" ?>
-        <routes xmlns="http://symfony.com/schema/routing"
-            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-            xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+       .. code-block:: xml
 
-           <!-- ... -->
+           <!-- app/config/routing.xml -->
+           <?xml version="1.0" encoding="UTF-8" ?>
+           <routes xmlns="http://symfony.com/schema/routing"
+               xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+               xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
 
-           <import resource="@CmfMediaBundle/Resources/config/routing/download.xml" />
-       </routes>
+              <!-- ... -->
 
-   .. code-block:: php
+              <import resource="@CmfMediaBundle/Resources/config/routing/file.xml" />
+              <import resource="@CmfMediaBundle/Resources/config/routing/image.xml" />
+           </routes>
 
-       // app/config/routing.php
-       $collection->addCollection(
-           $loader->import("@CmfMediaBundle/Resources/config/routing/download.xml")
-       );
+       .. code-block:: php
 
-       return $collection;
+           // app/config/routing.php
+           $collection->addCollection(
+               $loader->import("@CmfMediaBundle/Resources/config/routing/file.xml")
+           );
+           $collection->addCollection(
+               $loader->import("@CmfMediaBundle/Resources/config/routing/image.xml")
+           );
+
+           return $collection;
+
+2. Run the ``doctrine:phpcr:repository:init`` command, it runs all tagged
+   :ref:`phpcr-odm-repository-initializers` including the MediaBundle
+   initializer.
 
 Interfaces
 ----------
@@ -159,7 +174,7 @@ Image class and later grow.
 The MediaBundle provides the following interfaces:
 
 * **MediaInterface**:      base class;
-* **MetaDataInterface**:   meta data definition;
+* **MetadataInterface**:   meta data definition;
 * **FileInterface**:       identifies a file;
 * **ImageInterface**:      identifies the media as an image;
 * **FileSystemInterface**: the file is stored on a filesystem and the path is
@@ -294,6 +309,19 @@ The media bundle contains a Twig extension, it contains the following functions:
       .. code-block:: php+html
 
           <a href="<?php echo $view['cmf_media']->downloadUrl($file) ?>" title="Download">Download</a>
+
+* **cmf_media_display_url**: returns the url to display a media implementing
+  the ImageInterface
+
+  .. configuration-block::
+
+      .. code-block:: jinja
+
+          <img src="{{ cmf_media_display_url(image) }}" alt="" />
+
+      .. code-block:: php+html
+
+          <img src="<?php echo $view['cmf_media']->displayUrl($image) ?>" alt="" />
 
 SonataMediaBundle integration
 -----------------------------

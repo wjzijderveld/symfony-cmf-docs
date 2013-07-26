@@ -32,6 +32,8 @@ AsseticBundle, FOSRestBundle and by inference also JmsSerializerBundle. Make
 sure you instantiate all those bundles in your kernel and properly configure
 assetic.
 
+To upload and display images the :doc:`MediaBundle <media>` is used.
+
 Installation
 ------------
 
@@ -241,9 +243,7 @@ Configuration
             # rest_controller_class: FQN\Classname
 
             # image handling
-            image:
-                model_class: ~
-                controller_class: ~
+            image_controller_class: Symfony\Cmf\Bundle\CreateBundle\Controller\ImageController
 
             # access check role for js inclusion, default REST and image controllers
             # role: IS_AUTHENTICATED_ANONYMOUSLY
@@ -284,6 +284,7 @@ Configuration
         <config xmlns="http://cmf.symfony.com/schema/dic/create"
             auto-mapping="true"
             rest-controller-class="FQN\ClassName"
+            image_controller-class="Symfony\Cmf\Bundle\CreateBundle\Controller\ImageController"
             role="IS_AUTHENTICATED_ANONYMOUSLY"
             phpcr-odm="true"
             stanbol-url="http://dev.iks-project.eu:8081"
@@ -292,12 +293,6 @@ Configuration
 
             <!-- directory list to look for metadata -->
             <rdf-config-dir>%kernel.root_dir%/Resources/rdf-mappings</rdf-config-dir>
-
-            <!-- image handling -->
-            <image
-                model-class=""
-                controller-class=""
-            />
 
             <!-- mapping from rdf type name => class name used when adding items to collections -->
             <map
@@ -331,10 +326,7 @@ Configuration
             // 'rest_controller_class' => 'FQN\Classname'
 
             // image handling
-            'image' => array(
-                'model_class'      => null,
-                'controller_class' => null,
-            ),
+            'image_controller_class' => 'Symfony\Cmf\Bundle\CreateBundle\Controller\ImageController',
 
             // access check role for js inclusion, default REST and image controllers
             // 'role' => 'IS_AUTHENTICATED_ANONYMOUSLY',
@@ -394,12 +386,10 @@ isEditable to answer whether the passed domain object is editable.
 Image Handling
 ~~~~~~~~~~~~~~
 
-Enable the default simplistic image handler with the image > model_class |
-controller_class settings. This image handler just throws images into the
-PHPCR-ODM repository and also serves them in requests.
+For image handling the :doc:`MediaBundle <media>` is used. Enable it by
+configuring the image_controller_class setting.
 
-If you need different image handling, you can either overwrite
-``image.model_class`` and/or ``image.controller_class``, or implement a custom
+If you need different image handling, you can implement a custom
 ``ImageController`` and override the ``cmf_create.image.controller``
 service with it.
 

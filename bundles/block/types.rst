@@ -168,7 +168,7 @@ define the imagine filter you specify in the block. The default name is
 
         // app/config/config.php
         $container->loadFromExtension('cmf_block', array(
-            // ..
+            // ...
             'imagine' => true,
         ));
 

@@ -571,6 +571,8 @@ resolve the path or id back to a PHPCR node to set the reference.
 This type extends the ``text`` form type. It adds an option
 ``transformer_type`` that can be set to either ``path`` or ``uuid``.
 
+.. _phpcr-odm-repository-initializers:
+
 Repository Initializers
 -----------------------
 
