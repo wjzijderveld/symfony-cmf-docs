@@ -221,7 +221,7 @@ above:
 
 * **default.php**: framework, doctrine, security;
 * **sonata_admin.php**: sonata_admin, sonata_block;
-* **phpcr-odm.php**: doctrine_phpcr.
+* **phpcr_odm.php**: doctrine_phpcr.
 
 Note that each must be prefixed with the ``CMF_TEST_CONFIG_DIR`` constant.
 
